@@ -1,0 +1,9 @@
+out/
+build/
+.gradle/
+.idea/
+*.png
+*.html
+*.json
+*.iml
+*.sh
