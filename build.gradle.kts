@@ -42,7 +42,7 @@ dependencies {
 //        exclude(module="JDA")
     }
     implementation("club.minnced:magma:+")
-    implementation("club.minnced:jda-reactor:+")
+//    implementation("club.minnced:jda-reactor:+")
 }
 
 val shadowJar: ShadowJar by tasks

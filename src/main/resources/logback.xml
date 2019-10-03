@@ -8,7 +8,7 @@
     </appender>
 
 <!--    <logger name="net.dv8tion.jda.internal.handle.GuildSetupController" level="trace" />-->
-    <logger name="net.dv8tion.jda.internal.handle.PresenceUpdateHandler" level="trace" />
+    <logger name="net.dv8tion.jda.internal.handle.PresenceUpdateHandler" level="debug" />
 <!--    <logger name="net.dv8tion.jda.internal.entities.EntityBuilder" level="trace" />-->
     <logger name="net.dv8tion.jda.internal.requests.Requester" level="trace" />
 

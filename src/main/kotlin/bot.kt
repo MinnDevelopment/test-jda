@@ -1,19 +1,24 @@
 @file:JvmName("Bot")
+
 import club.minnced.jda.reactor.asMono
 import club.minnced.jda.reactor.createManager
 import club.minnced.jda.reactor.on
+import net.dv8tion.jda.api.JDA
 import net.dv8tion.jda.api.JDABuilder
 import net.dv8tion.jda.api.OnlineStatus
 import net.dv8tion.jda.api.Permission
 import net.dv8tion.jda.api.entities.Activity
+import net.dv8tion.jda.api.events.ReadyEvent
 import net.dv8tion.jda.api.events.message.guild.GuildMessageReceivedEvent
 import net.dv8tion.jda.api.utils.ChunkingFilter
 import net.dv8tion.jda.api.utils.cache.CacheFlag
 import net.dv8tion.jda.api.utils.data.DataObject
 import org.reactivestreams.Publisher
+import reactor.core.publisher.Flux
 import reactor.core.publisher.Mono
 import reactor.core.scheduler.Schedulers
 import java.io.File
+import java.time.Duration
 import java.util.*
 import java.util.concurrent.Executors
 import javax.script.ScriptEngine
@@ -22,7 +27,7 @@ import javax.script.ScriptEngineManager
 typealias Task = Publisher<*>
 
 val token: String by lazy {
-    DataObject.fromJson(File("tokens.json").readText()).getString("bot")
+    DataObject.fromJson(File("tokens.json").reader()).getString("bot")
 }
 
 val engine: ScriptEngine by lazy {
@@ -46,7 +51,7 @@ val prefix = "--"
 
 fun main() {
     val manager = createManager {
-        setScheduler(Schedulers.fromExecutor(pool))
+        scheduler = Schedulers.fromExecutor(pool)
     }
 
     val jda = JDABuilder(token)
@@ -57,16 +62,37 @@ fun main() {
             .setGatewayPool(pool)
             .setRateLimitPool(pool)
             .setCallbackPool(pool)
-            .setDisabledCacheFlags(EnumSet.allOf(CacheFlag::class.java))
+//            .setGuildSubscriptionsEnabled(false)
+            .setEnabledCacheFlags(EnumSet.of(CacheFlag.VOICE_STATE))
             .setChunkingFilter(ChunkingFilter.NONE)
             .build()
+
+    // Handle commands (guild/owner only)
     jda.on<GuildMessageReceivedEvent>()
        .filter { it.author.asTag == "Minn#6688" }
        .filter { it.guild.selfMember.hasPermission(it.channel, Permission.MESSAGE_WRITE) }
        .flatMap(::onMessage)
+       .onErrorContinue { t, _ ->
+           t.printStackTrace()
+       }
        .subscribe()
+
+    // Handle activity streaming
+    jda.on<ReadyEvent>()
+       .next()
+       .doOnSuccess { jda.presence.setStatus(OnlineStatus.ONLINE) }
+       .flatMapMany { Flux.interval(Duration.ZERO, Duration.ofSeconds(15)) }
+       .takeUntil { jda.status == JDA.Status.SHUTDOWN }
+       .filter { jda.status == JDA.Status.CONNECTED }
+       .subscribe {
+           System.gc()
+           val users = jda.userCache.size()
+           val memory = Runtime.getRuntime().let { it.totalMemory() - it.freeMemory() } / (1024 * 1024)
+           jda.presence.activity = Activity.watching("$users users at $memory MiB")
+       }
 }
 
+// Basic command handling
 fun onMessage(event: GuildMessageReceivedEvent): Task {
     if (!event.message.contentRaw.startsWith(prefix)) {
         return Mono.empty<Unit>()
@@ -110,6 +136,3 @@ fun eval(event: GuildMessageReceivedEvent, args: List<String>): Task {
         return event.channel.sendMessage(t.toString()).asMono()
     }
 }
-
-
-
