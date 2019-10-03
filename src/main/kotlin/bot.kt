@@ -113,7 +113,7 @@ fun ping(event: GuildMessageReceivedEvent, args: List<String>): Task {
              .flatMap { event.channel.sendMessage("Ping: $it ms").asMono() }
 }
 
-fun eval(event: GuildMessageReceivedEvent, args: List<String>): Task {
+fun eval(event: GuildMessageReceivedEvent, args: List<String>): Task = Mono.defer {
     engine["event"] = event
     engine["message"] = event.message
     engine["author"] = event.author
@@ -124,15 +124,15 @@ fun eval(event: GuildMessageReceivedEvent, args: List<String>): Task {
 
     try {
         val output = engine.eval(event.message.contentRaw.substring(prefix.length + "eval".length))
-                ?: return event.message.addReaction("\uD83D\uDC4D\uD83C\uDFFB").asMono()
+                ?: return@defer event.message.addReaction("\uD83D\uDC4D\uD83C\uDFFB").asMono()
 
-        return event.channel.sendMessage(output.toString()).asMono()
-    }
-    catch (ex: Exception) {
+        return@defer event.channel.sendMessage(output.toString()).asMono()
+    } catch (ex: Exception) {
         ex.printStackTrace()
         var t: Throwable = ex
         while (ex.cause != null)
             t = ex.cause!!
-        return event.channel.sendMessage(t.toString()).asMono()
+        return@defer event.channel.sendMessage(t.toString()).asMono()
     }
-}
+
+}.subscribeOn(Schedulers.elastic())
