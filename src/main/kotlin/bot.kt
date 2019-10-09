@@ -62,7 +62,7 @@ fun main() {
             .setGatewayPool(pool)
             .setRateLimitPool(pool)
             .setCallbackPool(pool)
-//            .setGuildSubscriptionsEnabled(false)
+            .setGuildSubscriptionsEnabled(false)
             .setEnabledCacheFlags(EnumSet.of(CacheFlag.VOICE_STATE))
             .setChunkingFilter(ChunkingFilter.NONE)
             .build()
