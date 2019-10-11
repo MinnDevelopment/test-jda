@@ -3,11 +3,13 @@
 import club.minnced.jda.reactor.asMono
 import club.minnced.jda.reactor.createManager
 import club.minnced.jda.reactor.on
+import club.minnced.jda.reactor.onRaw
 import net.dv8tion.jda.api.JDA
 import net.dv8tion.jda.api.JDABuilder
 import net.dv8tion.jda.api.OnlineStatus
 import net.dv8tion.jda.api.Permission
 import net.dv8tion.jda.api.entities.Activity
+import net.dv8tion.jda.api.events.RawGatewayEvent
 import net.dv8tion.jda.api.events.ReadyEvent
 import net.dv8tion.jda.api.events.message.guild.GuildMessageReceivedEvent
 import net.dv8tion.jda.api.utils.ChunkingFilter
@@ -63,9 +65,17 @@ fun main() {
             .setRateLimitPool(pool)
             .setCallbackPool(pool)
             .setGuildSubscriptionsEnabled(false)
+            .setRawEventsEnabled(true)
             .setEnabledCacheFlags(EnumSet.of(CacheFlag.VOICE_STATE))
             .setChunkingFilter(ChunkingFilter.NONE)
             .build()
+
+    jda.onRaw("MESSAGE_REACTION_ADD")
+       .map { "reaction add: ${it.payload}" }
+       .subscribe(::println)
+    jda.onRaw("MESSAGE_REACTION_REMOVE")
+       .map { "reaction rem: ${it.payload}" }
+       .subscribe(::println)
 
     // Handle commands (guild/owner only)
     jda.on<GuildMessageReceivedEvent>()
