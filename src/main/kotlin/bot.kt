@@ -9,13 +9,14 @@ import net.dv8tion.jda.api.JDABuilder
 import net.dv8tion.jda.api.OnlineStatus
 import net.dv8tion.jda.api.Permission
 import net.dv8tion.jda.api.entities.Activity
-import net.dv8tion.jda.api.events.RawGatewayEvent
 import net.dv8tion.jda.api.events.ReadyEvent
 import net.dv8tion.jda.api.events.message.guild.GuildMessageReceivedEvent
 import net.dv8tion.jda.api.utils.ChunkingFilter
 import net.dv8tion.jda.api.utils.cache.CacheFlag
 import net.dv8tion.jda.api.utils.data.DataObject
 import org.reactivestreams.Publisher
+import org.slf4j.Logger
+import org.slf4j.LoggerFactory
 import reactor.core.publisher.Flux
 import reactor.core.publisher.Mono
 import reactor.core.scheduler.Schedulers
@@ -23,6 +24,8 @@ import java.io.File
 import java.time.Duration
 import java.util.*
 import java.util.concurrent.Executors
+import java.util.concurrent.ScheduledExecutorService
+import java.util.concurrent.TimeUnit
 import javax.script.ScriptEngine
 import javax.script.ScriptEngineManager
 
@@ -47,9 +50,9 @@ val engine: ScriptEngine by lazy {
 
 operator fun ScriptEngine.set(key: String, value: Any?) = put(key, value)
 
-val pool = Executors.newScheduledThreadPool(8)
-
-val prefix = "--"
+const val prefix = "--"
+val messageLog: Logger = LoggerFactory.getLogger("Messages")
+val pool: ScheduledExecutorService = Executors.newScheduledThreadPool(8)
 
 fun main() {
     val manager = createManager {
@@ -79,6 +82,11 @@ fun main() {
 
     // Handle commands (guild/owner only)
     jda.on<GuildMessageReceivedEvent>()
+       .doOnNext {
+           messageLog.info("[{}#{}] {}: {}",
+                           it.guild.name, it.channel.name, it.author.asTag,
+                           it.message.contentDisplay.take(100).replace("\n", " "))
+       }
        .filter { it.author.asTag == "Minn#6688" }
        .filter { it.guild.selfMember.hasPermission(it.channel, Permission.MESSAGE_WRITE) }
        .flatMap(::onMessage)
