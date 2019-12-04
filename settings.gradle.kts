@@ -2,7 +2,7 @@ rootProject.name = "test-jda"
 
 includeBuild("../JDA") {
     dependencySubstitution {
-        substitute(module("net.dv8tion:jda")).with(project(":"))
+        substitute(module("net.dv8tion:JDA")).with(project(":"))
     }
 }
 
@@ -18,9 +18,8 @@ includeBuild("../JDA") {
 //    }
 //}
 
-//includeBuild("../jda-reactor") {
-//    dependencySubstitution {
-//        substitute(module("club.minnced:jda-reactor")).with(project(":"))
-//    }
-
-//}
+includeBuild("../jda-reactor") {
+    dependencySubstitution {
+        substitute(module("club.minnced:jda-reactor")).with(project(":"))
+    }
+}

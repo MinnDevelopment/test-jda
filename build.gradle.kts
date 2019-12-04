@@ -5,7 +5,7 @@ plugins {
     idea
     application
     id("com.github.johnrengelman.shadow") version "4.0.4"
-    kotlin("jvm") version "1.3.50"
+    kotlin("jvm") version "1.3.61"
 }
 
 application.mainClassName = "Bot"
@@ -17,13 +17,17 @@ configure<JavaPluginConvention> {
 
 repositories {
     jcenter()
+    maven("https://repo.spring.io/snapshot")
+    maven("https://repo.spring.io/milestone")
     maven("https://jitpack.io")
 }
 
 dependencies {
     implementation(kotlin("stdlib-jdk8"))
     implementation(kotlin("scripting-jsr223"))
-    implementation("net.dv8tion:jda")
+    implementation("org.jetbrains.kotlinx:kotlinx-coroutines-core:1.3.2")
+
+    implementation("net.dv8tion:JDA:+")
     implementation("org.json:json:20160810")
     implementation("net.sf.trove4j:trove4j:3.0.3")
     implementation("org.slf4j:slf4j-api:1.7.25")
@@ -31,8 +35,9 @@ dependencies {
     implementation("ch.qos.logback:logback-classic:1.2.3")
     implementation("org.codehaus.groovy:groovy-jsr223:2.4.14")
     implementation("io.projectreactor:reactor-core:3.2.5.RELEASE")
+    implementation("com.vdurmont:emoji-java:5.1.1")
 
-    implementation("club.minnced:jda-reactor:+") {
+    implementation("club.minnced:jda-reactor:0.3.1") {
         exclude(module="JDA")
     }
     implementation("com.sedmelluq:lavaplayer:1.3.17") {
@@ -42,6 +47,9 @@ dependencies {
 //        exclude(module="JDA")
     }
     implementation("club.minnced:magma:+")
+    implementation("club.minnced:discord-webhooks:+")
+    implementation("io.r2dbc:r2dbc-client:1.0.0.M7")
+    implementation("io.r2dbc:r2dbc-postgresql:1.0.0.M7")
 //    implementation("club.minnced:jda-reactor:+")
 }
 

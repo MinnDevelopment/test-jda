@@ -7,3 +7,4 @@ build/
 *.json
 *.iml
 *.sh
+.todo-password

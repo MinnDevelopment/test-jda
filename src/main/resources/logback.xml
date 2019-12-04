@@ -1,19 +1,24 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <configuration debug="false">
-
+    <statusListener class="ch.qos.logback.core.status.NopStatusListener" />
     <appender name="STDOUT" class="ch.qos.logback.core.ConsoleAppender">
         <encoder>
             <pattern>%d{HH:mm:ss.SSS} %boldCyan(%-34.-34thread) %red(%10.10X{jda.shard}) %boldGreen(%-15.-15logger{0}) %highlight(%-6level) %msg%n</pattern>
         </encoder>
     </appender>
 
-<!--    <logger name="net.dv8tion.jda.internal.handle.GuildSetupController" level="trace" />-->
-    <logger name="net.dv8tion.jda.internal.handle.PresenceUpdateHandler" level="debug" />
+    <appender name="WEBHOOK" class="WebhookAppender">
+        <encoder><pattern>%msg</pattern></encoder>
+    </appender>
+
+    <logger name="net.dv8tion.jda.internal.handle.GuildSetupController" level="trace" />
+    <logger name="net.dv8tion.jda.internal.handle.PresenceUpdateHandler" level="trace" />
 <!--    <logger name="net.dv8tion.jda.internal.entities.EntityBuilder" level="trace" />-->
     <logger name="net.dv8tion.jda.internal.requests.Requester" level="trace" />
 
     <root level="debug">
         <appender-ref ref="STDOUT" />
+        <appender-ref ref="WEBHOOK" />
     </root>
 
 </configuration>
